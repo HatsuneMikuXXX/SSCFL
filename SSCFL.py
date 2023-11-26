@@ -5,9 +5,10 @@ class FacilityLocation:
     def __init__(self, number_of_clients, number_of_facilities):    
         self.demands = [0 for i in range(number_of_clients)]
         self.capacities = [0 for j in range(number_of_facilities)]
-        self.facility_cost = [0 for j in range(number_of_facilities)]
+        self.facility_costs = [0 for j in range(number_of_facilities)]
         self.route_costs = dict({}) # keys: (client, facility)
         self.preferences = dict({}) # keys: client; value: list / list-index: preference-ranking; list-value: facility, 0 to m-1, 0 = top preference
+        self.rankings = dict({}) # keys: client; value: list / list-index: facility; list-value: preference-ranking
         
         self.solution_facilities_to_open = []
         self.solution_assignments = dict({}) # keys: client
@@ -23,18 +24,19 @@ class FacilityLocation:
 
     def set_facility_cost_at(self, facility_j, cost):
         assert cost >= 0
-        self.facility_cost[facility_j] = cost
+        self.facility_costs[facility_j] = cost
 
     def set_route_cost_at(self, client_i, facility_j, cost):
         assert cost >= 0
         self.route_costs[(client_i, facility_j)] = cost
     
     def set_preferences_of(self, client_i, preferences):
-        n = len(self.capacities)
-        assert len(preferences) == n
-        for i in range(n):
-            assert i in preferences
-        self.preferences[client_i] = preferences
+        m = len(self.capacities)
+        assert len(preferences) == m
+        for j in range(m):
+            assert j in preferences
+            self.rankings[preferences[j]] = j 
+        self.preferences[client_i] = preferences.copy()
 
     # Set demands, capacities, facility cost, route costs, and preferences according to a probability distribution
     def set_demands_randomly(self, demands, probability_distribution, discrete = True):
@@ -90,11 +92,51 @@ class FacilityLocation:
             for j in range(m):
                 # Determine next facility
                 facility = sample(M, copy_of_prob_dist, eliminate_almost_never_probabilities = True)
-                preference_list.add(facility)
+                preference_list.append(facility)
                 # Remove option to pick that facility again
                 copy_of_prob_dist[facility] = 0
             # Assign it
-            self.preferences[i] = preference_list
+            self.set_preferences_of(i, preference_list)
+
+    # Get information
+    def number_of_clients(self):
+        return len(self.demands)
+    
+    def number_of_facilities(self):
+        return len(self.capacities)
+
+    def demands(self):
+        return self.demands.copy()
+    
+    def capacities(self):
+        return self.capacities.copy()
+    
+    def facility_costs(self):
+        return self.facility_costs.copy()
+    
+    def route_costs(self):
+        return self.route_costs.copy()
+    
+    def preferences(self, client):
+        return self.preferences[client].copy()
+    
+    def rankings(self, client):
+        return self.rankings[client].copy()
+    
+    # Print instance information
+    def status(self):
+        print("##### ##### ##### ##### ##### ##### ##### ##### ##### #####")
+        for client, facility in self.solution_assignments.items():
+            print("Client", client, "is assigned to", facility, "with demands", self.demands[client])
+        for facility in self.solution_facilities_to_open:
+            print("Facility", facility, "has a capacity of", self.capacities[facility])
+        if self.feasible():
+            print("The solution is feasible")
+        else:
+            print("The solution is infeasible")
+        print("The total cost is", self.solution_value())
+        
+        print("##### ##### ##### ##### ##### ##### ##### ##### ##### #####")     
 
     # Set solution
     def set_solution(self, facilities_to_open, assignments):
@@ -103,32 +145,37 @@ class FacilityLocation:
     
     # Feasibility check
     def feasible(self):
-        issues = []
+        self.issues = []
+        if len(self.solution_assignments) == 0:
+            print("WTF")
+        # Every client is served
+        for i in range(self.number_of_clients()):
+            if i not in self.solution_assignments.keys():
+                self.issues.append(str("Client" + str(i) + "is not served"))
         # Single Source, Capacities, Facility is open, Preferences
         for client, facility_list in self.solution_assignments.items():
             if len(facility_list) != 1:
-                issues.add(str("Single-Source is violated for client", client))
+                self.issues.append(str("Single-Source is violated for client" + str(client)))
                 continue
             [facility] = facility_list
             if self.demands[client] > self.capacities[facility]:
-                issues.add(str("Capacity is violated for client", client))
+                self.issues.append(str("Capacity is violated for client" + str(client)))
             if facility not in self.solution_facilities_to_open:
-                issues.add(str("Facility", facility, "is closed but still assigned")) 
+                self.issues.append(str("Facility" + str(facility) + "is closed but still assigned")) 
             for facility in self.preferences[client]:
                 if facility in self.solution_facilities_to_open:
                     if facility != self.solution_assignments[client]:
-                        issues.add(str("Client", client, "is assigned to", self.solution_assignments[client], "but", facility, "is more preferred"))
+                        self.issues.append(str("Client" + str(client) + "is assigned to" + str(self.solution_assignments[client]) + "but" + str(facility) + "is more preferred"))
                     break
-        return (bool(issues), issues)
+        return bool(self.issues)
     
     # Objective value
     def solution_value(self):
         res = 0
         for facility in self.solution_facilities_to_open:
-            res += self.facility_cost[facility]
+            res += self.facility_costs[facility]
         for _, cost in self.solution_assignments.items():
             res += cost
         return res
-
 
     

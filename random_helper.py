@@ -28,7 +28,7 @@ def sample(Elements, Probabilities, eliminate_almost_never_probabilities = False
         adjustment = 0
         for i in range(n):
             if probabilities_copy[i] == 0:
-                toRemove.add(i - adjustment)
+                toRemove.append(i - adjustment)
                 adjustment += 1
         for r in toRemove:
             del probabilities_copy[r]
