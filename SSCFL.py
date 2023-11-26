@@ -35,7 +35,9 @@ class FacilityLocation:
         assert len(preferences) == m
         for j in range(m):
             assert j in preferences
-            self.rankings[preferences[j]] = j 
+            if client_i not in self.rankings.keys():
+                self.rankings[client_i] = [0 for k in range(m)]
+            self.rankings[client_i][preferences[j]] = j 
         self.preferences[client_i] = preferences.copy()
 
     # Set demands, capacities, facility cost, route costs, and preferences according to a probability distribution
@@ -105,37 +107,47 @@ class FacilityLocation:
     def number_of_facilities(self):
         return len(self.capacities)
 
-    def demands(self):
+    def get_demands(self):
         return self.demands.copy()
     
-    def capacities(self):
+    def get_capacities(self):
         return self.capacities.copy()
     
-    def facility_costs(self):
+    def get_facility_costs(self):
         return self.facility_costs.copy()
     
-    def route_costs(self):
+    def get_route_costs(self):
         return self.route_costs.copy()
     
-    def preferences(self, client):
+    def get_preferences(self, client):
         return self.preferences[client].copy()
     
-    def rankings(self, client):
+    def get_rankings(self, client):
         return self.rankings[client].copy()
     
     # Print instance information
-    def status(self):
+    def status(self, print_issues = False):
+        data_facilities = dict({})
+        output_facilities = dict({})
+        for j in range(self.number_of_facilities()):
+            data_facilities[j] = []
+            output_facilities[j] = 0
         print("##### ##### ##### ##### ##### ##### ##### ##### ##### #####")
-        for client, facility in self.solution_assignments.items():
-            print("Client", client, "is assigned to", facility, "with demands", self.demands[client])
+        for client, facilities in self.solution_assignments.items():
+            for facility in facilities:
+                data_facilities[facility].append(client)
+                output_facilities[facility] += self.demands[client]
         for facility in self.solution_facilities_to_open:
-            print("Facility", facility, "has a capacity of", self.capacities[facility])
+            print("Facility", facility, "serves clients", data_facilities[facility] ,"at", output_facilities[facility], "/", self.capacities[facility])
+        print("The computed solution is:", self.solution_facilities_to_open)
         if self.feasible():
             print("The solution is feasible")
         else:
             print("The solution is infeasible")
+            if print_issues:
+                for issue in self.issues:
+                    print(issue)
         print("The total cost is", self.solution_value())
-        
         print("##### ##### ##### ##### ##### ##### ##### ##### ##### #####")     
 
     # Set solution
@@ -146,36 +158,35 @@ class FacilityLocation:
     # Feasibility check
     def feasible(self):
         self.issues = []
-        if len(self.solution_assignments) == 0:
-            print("WTF")
         # Every client is served
         for i in range(self.number_of_clients()):
             if i not in self.solution_assignments.keys():
-                self.issues.append(str("Client" + str(i) + "is not served"))
+                self.issues.append(str("Client " + str(i) + " is not served"))
         # Single Source, Capacities, Facility is open, Preferences
         for client, facility_list in self.solution_assignments.items():
             if len(facility_list) != 1:
-                self.issues.append(str("Single-Source is violated for client" + str(client)))
+                self.issues.append(str("Single-Source is violated for client " + str(client)))
                 continue
             [facility] = facility_list
             if self.demands[client] > self.capacities[facility]:
-                self.issues.append(str("Capacity is violated for client" + str(client)))
+                self.issues.append(str("Capacity is violated for client " + str(client)))
             if facility not in self.solution_facilities_to_open:
-                self.issues.append(str("Facility" + str(facility) + "is closed but still assigned")) 
+                self.issues.append(str("Facility " + str(facility) + " is closed but still assigned")) 
             for facility in self.preferences[client]:
                 if facility in self.solution_facilities_to_open:
-                    if facility != self.solution_assignments[client]:
-                        self.issues.append(str("Client" + str(client) + "is assigned to" + str(self.solution_assignments[client]) + "but" + str(facility) + "is more preferred"))
+                    if facility != self.solution_assignments[client][0]:
+                        self.issues.append(str("Client " + str(client) + " is assigned to " + str(self.solution_assignments[client]) + " but " + str(facility) + " is more preferred"))
                     break
-        return bool(self.issues)
+        return not bool(self.issues)
     
     # Objective value
     def solution_value(self):
         res = 0
         for facility in self.solution_facilities_to_open:
             res += self.facility_costs[facility]
-        for _, cost in self.solution_assignments.items():
-            res += cost
+        for client, facilities in self.solution_assignments.items():
+            for facility in facilities:
+                res += self.route_costs[(client, facility)]
         return res
 
     
