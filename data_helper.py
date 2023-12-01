@@ -1,3 +1,4 @@
+# For dictionaries that have lists as values. Prevent invalid index access error.
 def initialize_dict(keys, value):
     res = dict({})
     n = len(keys)

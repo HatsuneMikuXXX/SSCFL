@@ -1,4 +1,4 @@
-from random_helper import uniform, sample
+from random_helper import uniform, sample, get_uniform_distribution
 from data_helper import initialize_dict
 from itertools import product
 
@@ -20,7 +20,9 @@ class FacilityLocation:
         self.server_list = initialize_dict(M, []) # keys: facility
         self.issues = [] # Contains information about infeasible solutions
 
-    # Set demands, capacities, facility cost, route costs, and preferences
+    #########################################################################################
+    #/////////Set demands, capacities, facility cost, route costs, and preferences//////////#
+    #########################################################################################
     def set_demand_at(self, client_i, demand):
         assert demand >= 0
         self.demands[client_i] = demand
@@ -46,7 +48,9 @@ class FacilityLocation:
             self.rankings[client_i][preferences[j]] = j 
         self.preferences[client_i] = preferences.copy()
 
-    # Set demands, capacities, facility cost, route costs, and preferences according to a probability distribution
+    ################################################################################################################
+    # Set demands, capacities, facility cost, route costs, and preferences according to a probability distribution #
+    ################################################################################################################
     def set_demands_randomly(self, demands, probability_distribution, discrete = True):
         if discrete:
             for i in range(len(self.demands)):
@@ -97,7 +101,7 @@ class FacilityLocation:
             preference_list = []
             copy_of_prob_dist = probability_distribution.copy()
             M = list(range(m))
-            for j in range(m):
+            for _ in range(m):
                 # Determine next facility
                 facility = sample(M, copy_of_prob_dist, eliminate_almost_never_probabilities = True)
                 preference_list.append(facility)
@@ -106,7 +110,27 @@ class FacilityLocation:
             # Assign it
             self.set_preferences_of(i, preference_list)
 
-    # Get information
+    #########################################################################################
+    #///////////////////////////// Preference factory // ///////////////////////////////////#
+    #########################################################################################
+    def set_preferences_according_to(self, category):
+        match category:
+            case 0:
+                self.set_preferences_as_distance()
+            case 1:
+                m = self.number_of_facilities()
+                self.set_preferences_randomly(get_uniform_distribution(m))
+            case _:
+                assert False
+
+    def set_preferences_as_distance(self, lexicographic = True):
+        for client in range(self.number_of_clients()):
+            facility_distance_pairs = [(j, self.route_costs[(client, j)]) for j in range(self.number_of_facilities())]
+            facility_distance_pairs.sort(key=lambda pair: pair[1])
+            self.set_preferences_of(client, [facility for (facility, _) in facility_distance_pairs])
+    #########################################################################################
+    #/////////////////////////////////// Get information ///////////////////////////////////#
+    #########################################################################################
     def number_of_clients(self):
         return len(self.demands)
     
@@ -137,6 +161,9 @@ class FacilityLocation:
             cumulative_demand += self.demands[client]
         return cumulative_demand
     
+    #########################################################################################
+    #////////////////////// Methods revolving around a solution ////////////////////////////#
+    #########################################################################################
     # Set solution
     def set_solution(self, facilities_to_open, assignments):
         self.issues = ["Solution has not yet been checked"]
@@ -179,7 +206,9 @@ class FacilityLocation:
             res += self.route_costs[(client, facility)]
         return res
     
-    # Print instance information
+    #########################################################################################
+    #/////////////////////////// Print instance information ////////////////////////////////#
+    #########################################################################################
     def status(self, print_issues = False):
         print("##### ##### ##### ##### ##### ##### ##### ##### ##### #####")
         for facility in self.solution_facilities_to_open:

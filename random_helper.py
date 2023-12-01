@@ -7,6 +7,7 @@ def flip():
 def biased_flip(p):
     return random.random() < p
 
+# Returns a random number in [lb, ub] uniformly. If integer is true then it is drawn uniformly from the integers between lb and ub (inclusive)
 def uniform(lb, ub, return_integer = False):
     p = random.random()
     if return_integer:
@@ -16,6 +17,7 @@ def uniform(lb, ub, return_integer = False):
         return x
     return p*lb + (1 - p)*ub
 
+# Returns a random element from Elements using Probabilities as distribution. If the optional parameter is true then elements with probability 0 cannot be chosen, ever.
 def sample(Elements, Probabilities, eliminate_almost_never_probabilities = False):
     n = len(Probabilities)
     assert len(Elements) == n
@@ -42,6 +44,9 @@ def sample(Elements, Probabilities, eliminate_almost_never_probabilities = False
             return elements_copy[i]
         cumulative_sum += normed_P[i] 
     assert False
+
+def get_uniform_distribution(n):
+    return [1/n for _ in range(n)]
 
     
     

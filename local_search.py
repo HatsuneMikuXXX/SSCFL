@@ -1,3 +1,4 @@
+# Returns an initial solution using the stingy heuristic then optimizing it further by closing non-serving open facilities.
 def initial_solution(FacilityLocation):
     open_facilities = list(range(FacilityLocation.number_of_facilities())) # Open every facility
     edge_set = unique_edge_set(FacilityLocation, open_facilities)
@@ -15,6 +16,7 @@ def initial_solution(FacilityLocation):
     FacilityLocation.set_solution(open_facilities, edge_set)
     return open_facilities
 
+# Computes the unique assignment given the preferences and open facilities
 def unique_edge_set(FacilityLocation, open_facilities):
     edge_set = dict({})
     if not bool(open_facilities):
@@ -28,6 +30,7 @@ def unique_edge_set(FacilityLocation, open_facilities):
         edge_set[client] = best_ranked_facility
     return edge_set
 
+# Returns those facilities that have their capacity exceeded given a specific assignment
 def facilities_capacity_exceeded(FacilityLocation, assignment):
     demands = FacilityLocation.get_demands()
     capacities = FacilityLocation.get_capacities()
