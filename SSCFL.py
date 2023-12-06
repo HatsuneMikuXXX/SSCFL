@@ -2,6 +2,8 @@ from random_helper import uniform, sample, get_uniform_distribution
 from data_helper import initialize_dict
 from itertools import product
 
+# Deprecated
+
 class FacilityLocation:
     def __init__(self, number_of_clients, number_of_facilities):
         n = number_of_clients
