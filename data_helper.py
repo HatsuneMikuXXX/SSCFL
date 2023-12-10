@@ -8,4 +8,12 @@ def initialize_dict(keys, value):
         else:
             res[keys[i]] = value
     return res
+
+def powerset(L):
+	res = []
+	n = len(L)
+	for i in range(1 << n):
+		res.append([L[j] for j in range(n) if (i & (1 << j))])
+	res.sort()
+	return res
     

@@ -52,7 +52,7 @@ class FL_Generator:
         return (len(self.J), len(self.I), self.demands.copy(), self.capacities.copy(), self.opening_costs.copy(), self.travel_costs.copy(), self.preferences.copy())
     
     # Format according to TBED1/Reame [Readme*] available at https://or-brescia.unibs.it/instances/instances_sscflp
-    def save_instance(self, instance, filename, overwrite = False):
+    def save_instance(instance, filename, overwrite = False):
         (number_of_facilities, number_of_clients, demands, capacities, opening_costs, travel_costs, preferences) = instance
         line1 = str(number_of_facilities) + "\t" + str(number_of_clients)
         line2 = ""
@@ -86,7 +86,7 @@ class FL_Generator:
             return False
         return True
 
-    def load_instance(self, filename):
+    def load_instance(filename):
         # Parse data
         file = open(filename, 'r')
         content = file.read()
@@ -103,12 +103,12 @@ class FL_Generator:
             if c != ",":
                 value += c
             else:
-                info.append(int(value))
+                info.append(float(value))
                 value = ""
         
         # Extract data
-        m = info[0]
-        n = info[1]
+        m = int(info[0])
+        n = int(info[1])
         res = FL_Generator(m, n)
         current_index = 2
         # Demand
@@ -137,7 +137,7 @@ class FL_Generator:
         for i in range(n):
             lb = current_index + i*m
             ub = current_index + (i + 1) * m
-            res.preferences[i] = [info[index] for index in range(lb, ub)]
+            res.preferences[i] = [int(info[index]) for index in range(lb, ub)]
         return res.get_instance()
         
 

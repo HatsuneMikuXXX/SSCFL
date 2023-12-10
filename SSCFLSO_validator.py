@@ -1,7 +1,8 @@
 from data_helper import initialize_dict
 
 class FL_Validator:
-    def __init__(self, number_of_facilities, number_of_clients, demands, capacities, opening_costs, travel_costs, preferences):
+    def __init__(self, instance):
+        (number_of_facilities, number_of_clients, demands, capacities, opening_costs, travel_costs, preferences) = instance
         self.J = list(range(number_of_facilities))
         self.I = list(range(number_of_clients))
         self.c = travel_costs

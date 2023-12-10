@@ -1,13 +1,23 @@
 from SSCFLSO_generator import FL_Generator
 from SSCFLSO_validator import FL_Validator
 from random_helper import uniform
-from preprocess import initial_solution
+from algorithms.preprocess import preprocess
+from algorithms.greedy import greedy
+from algorithms.stingy import stingy
+from algorithms.brute_force import brute_force
+from algorithms.local_search import local_search
 
 
-m = 3
-n = 5
-x = FL_Generator(m, n)
-x.i300("instances/own_generated/test2.plc")
+i = FL_Generator.load_instance("instances/own_generated/example.plc")
+x = FL_Validator(i)
+brute_force(i, show_all_feasible=True)
+o = local_search(i)
+print(o)
+x.set_solution(o)
+print(x.get_value())
+
+
+
 #str_to_dict(s)
 #for key, value in d.items():
 #    print(key, value)

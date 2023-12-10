@@ -2,11 +2,11 @@ from SSCFLSO_validator import FL_Validator
 
 # Preprocessing: Remove facilities that can never be opened
 
-# Returns an initial solution using the stingy heuristic
-def initial_solution(FL_Generator):
-    (clients,facilities,demands,capacities,opening_cost,travel_cost,preferences) = FL_Generator.get_instance()
-    FLV = FL_Validator(clients,facilities,demands,capacities,opening_cost,travel_cost,preferences)
-    open_facilities = facilities
+# Returns an initial solution by considering every facility then removing every facility that cannot possibly serve
+def preprocess(instance):
+    (facilities,clients,demands,capacities,opening_cost,travel_cost,preferences) = instance
+    FLV = FL_Validator(instance)
+    open_facilities = list(range(facilities))
     FLV.set_solution(open_facilities)
     while bool(open_facilities) and not FLV.feasible():
         facilities_to_close = facilities_capacity_exceeded(demands,capacities, FLV.get_assignment())
