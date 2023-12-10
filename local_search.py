@@ -1,24 +1,5 @@
 from SSCFLSO_validator import FL_Validator
 
-# Returns an initial solution using the stingy heuristic then optimizing it further by closing non-serving open facilities.
-def initial_solution(FL_Generator):
-    (clients,facilities,travel_cost,opening_cost,demands,capacities,preferences) = FL_Generator.get_instance()
-    FLV = FL_Validator(clients,facilities,travel_cost,opening_cost,demands,capacities,preferences)
-    open_facilities = facilities
-    FLV.set_solution(open_facilities)
-    while bool(open_facilities) and not FLV.feasible():
-        facilities_to_close = facilities_capacity_exceeded(demands,capacities, FLV.get_assignment())
-        open_facilities = list(set(open_facilities) - set(facilities_to_close))
-        FLV.set_solution(open_facilities)
-    # Optimize by closing non-serving facilities
-    return open_facilities
-
-# Returns those facilities that have their capacity exceeded given a specific assignment
-def facilities_capacity_exceeded(demands, capacities, assignment):
-    c = capacities.copy() 
-    for client, facility in assignment.items():
-        c[facility] -= demands[client]
-    # Facilities to close
-    return [j for j in range(len(capacities)) if c[j] < 0]
+print()
 
         

@@ -1,9 +1,9 @@
 from data_helper import initialize_dict
 
 class FL_Validator:
-    def __init__(self, clients, facilities, travel_costs, opening_costs, demands, capacities, preferences):
-        self.I = clients
-        self.J = facilities
+    def __init__(self, number_of_facilities, number_of_clients, demands, capacities, opening_costs, travel_costs, preferences):
+        self.J = list(range(number_of_facilities))
+        self.I = list(range(number_of_clients))
         self.c = travel_costs
         self.f = opening_costs
         self.d = demands
@@ -71,5 +71,5 @@ class FL_Validator:
             self.value += self.f[j]
         for i in self.I:
             j = self.assignment[i]
-            self.value += self.c[(i, j)]
+            self.value += self.c[(j, i)]
 

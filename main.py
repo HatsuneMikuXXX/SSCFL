@@ -1,18 +1,25 @@
 from SSCFLSO_generator import FL_Generator
 from SSCFLSO_validator import FL_Validator
-from local_search import initial_solution
+from random_helper import uniform
+from preprocess import initial_solution
 
-n = 300
-m = 300
-x = FL_Generator(n, m)
-x.i300()
-(a,b,c,d,e,f,g) = x.get_instance()
 
-o = initial_solution(x)
+m = 3
+n = 5
+x = FL_Generator(m, n)
+x.i300("instances/own_generated/test2.plc")
+#str_to_dict(s)
+#for key, value in d.items():
+#    print(key, value)
 
-y = FL_Validator(a,b,c,d,e,f,g)
-y.set_solution(o)
-print(o)
-print(y.feasible())
-print(y.get_value())
+#x.i300()
+#(a,b,c,d,e,f,g) = x.get_instance()
+
+#o = initial_solution(x)
+
+#y = FL_Validator(a,b,c,d,e,f,g)
+#y.set_solution(o)
+#print(o)
+#print(y.feasible())
+#print(y.get_value())
 
