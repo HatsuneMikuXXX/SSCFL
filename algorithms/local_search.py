@@ -21,15 +21,11 @@ def local_search(instance):
 				FLV.set_solution(next)
 				value = FLV.get_value()
 				if FLV.feasible() and value < min_value:
-					print("Could", category)
-					print("New solution", next)
 					open_facilities = next.copy()
 					min_value = value
 					stuck_in_optima = False
 					break
 			else:
-				print("Current solution", open_facilities)
-				print("Cannot", category)
 				continue
 			break
 	return open_facilities

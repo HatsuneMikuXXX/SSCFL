@@ -1,115 +1,21 @@
-F = [3,3,2,2]
-U = [2,2,1,1]
-I = [0,1,2,3]
-J = [0,1,2,3]
-# Unit Demand
-C1 = [0,0,0,0]
-C2 = [0,0,0,0]
-C3 = [0,0,0,0]
-C4 = [0,0,0,0]
+#i = FL_Generator.load_instance("instances/own_generated/example.plc")
+i = FL_Generator.load_instance("instances/i300/i300_1.plc", no_preferences_included = True)
+x = FL_Validator(i)
 
-P1 = [0,1,2,3]
-P2 = [1,0,2,3]
-P3 = [2,3,0,1]
-P4 = [3,2,1,0]
-
-P = [P1, P2, P3, P4]
-C = [C1, C2, C3, C4]
-
-def check(S):
-    if len(S) == 0:
-        return (False, -1)
-    # Assignment
-    assignment = dict({})
-    for i in I:
-        for j in P[i]:
-            if j in S:
-                assignment[i] = j
-                break
-            
-    
-    # Cost computation
-    cost = 0
-    for i in S:
-        cost += F[i]
-    for i in I:
-        j = assignment[i]
-        cost += C[i][j]
-        
-    # Feasible Check
-    checka = True
-    capacities = U.copy()
-    for i in I:
-        j = assignment[i]
-        capacities[j] -= 1
-        if capacities[j] < 0:
-            checka = False
-        
-    return (checka, cost)
-    
-def powerset(s):
-    x = len(s)
-    res = []
-    for i in range(1 << x):
-        res.append([s[j] for j in range(x) if (i & (1 << j))])
-    return res
-    
-
-    
-def greedy():
-    print("Greedy")
-    S = []
-    while not check(S)[0]:
-        alpha = []
-        beta = []
-        for j in list(set(J) - set(S)):
-            T = S.copy()
-            T.append(j)
-            (a,b) = check(T)
-            alpha.append((T, b))
-            if a:
-                beta.append((T, b))
-        if len(beta) > 0:
-            beta.sort(key = lambda x: x[1])
-            S = beta[0][0].copy()
-        else:
-            alpha.sort(key = lambda x: x[1])
-            S = alpha[0][0].copy()
-        print(S)
-    return S
-    
-def stingy():
-    print("Stingy")
-    S = [0,1,2,3]
-    stop = False
-    while not stop:
-        beta = []
-        for j in S:
-            T = S.copy()
-            T.remove(j)
-            (a,b) = check(T)
-            if a: 
-                beta.append((T, b))
-        if len(beta) == 0:
-            stop = True
-        else:
-            beta.sort(key = lambda x: x[1])
-            S = beta[0][0].copy()
-        print(S)
-    return S
-        
-PS = powerset([0,1,2,3])
-A = []
-for p in PS:
-    A.append((p, check(p)))
-A.sort(key = lambda x: len(x[0]))
-for a in A:
-    print(a)  
-    
-greedy()
-stingy()
-    
-implement local search
-implement gtreedy
-implement stingy
-implement instance creator for files
+#print("Showing all feasible solutions via brute force")
+#brute_force(i, show_all_feasible=True)
+print("Local search")
+o = local_search(i)
+print(o)
+x.set_solution(o)
+print(x.get_value())
+print("Greedy")
+o = greedy(i)
+print(o)
+x.set_solution(o)
+print(x.get_value())
+print("Stingy")
+o = stingy(i)
+print(o)
+x.set_solution(o)
+print(x.get_value())

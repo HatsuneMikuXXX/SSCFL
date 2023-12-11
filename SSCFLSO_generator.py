@@ -86,7 +86,7 @@ class FL_Generator:
             return False
         return True
 
-    def load_instance(filename):
+    def load_instance(filename, no_preferences_included = False):
         # Parse data
         file = open(filename, 'r')
         content = file.read()
@@ -105,7 +105,6 @@ class FL_Generator:
             else:
                 info.append(float(value))
                 value = ""
-        
         # Extract data
         m = int(info[0])
         n = int(info[1])
@@ -133,11 +132,14 @@ class FL_Generator:
                 res.travel_costs[(j, i)] = info[index]
         current_index += m*n
 
-        # Preferences
-        for i in range(n):
-            lb = current_index + i*m
-            ub = current_index + (i + 1) * m
-            res.preferences[i] = [int(info[index]) for index in range(lb, ub)]
+        if no_preferences_included:
+            res.set_preferences(0)
+        else:
+            # Preferences
+            for i in range(n):
+                lb = current_index + i*m
+                ub = current_index + (i + 1) * m
+                res.preferences[i] = [int(info[index]) for index in range(lb, ub)]
         return res.get_instance()
         
 

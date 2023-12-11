@@ -6,30 +6,14 @@ from algorithms.greedy import greedy
 from algorithms.stingy import stingy
 from algorithms.brute_force import brute_force
 from algorithms.local_search import local_search
+from run import run
 
 
-i = FL_Generator.load_instance("instances/own_generated/example.plc")
-x = FL_Validator(i)
-brute_force(i, show_all_feasible=True)
-o = local_search(i)
-print(o)
-x.set_solution(o)
-print(x.get_value())
-
-
-
-#str_to_dict(s)
-#for key, value in d.items():
-#    print(key, value)
-
-#x.i300()
-#(a,b,c,d,e,f,g) = x.get_instance()
-
-#o = initial_solution(x)
-
-#y = FL_Validator(a,b,c,d,e,f,g)
-#y.set_solution(o)
-#print(o)
-#print(y.feasible())
-#print(y.get_value())
-
+s = "instances/i300/i300_"
+filenames = []
+for i in range(1, 21):
+	t = s
+	t += str(i) + ".plc"
+	filenames.append(t)
+save_location = "experimental_results/i300_Greedy.txt"
+run(filenames, save_location, no_preferences_included=True)
